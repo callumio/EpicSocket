@@ -29,7 +29,7 @@ namespace Mirage.Sockets.EpicSocket
         private SendPacketOptions _sendOptions;
         private ReceivePacketOptions _receiveOptions;
         private byte[] _singleByteCommand = new byte[1];
-        private byte[] _receiveBuffer = new byte[P2PInterface.MaxPacketSize];
+        private byte[] _receiveBuffer = new byte[P2PInterface.MAX_PACKET_SIZE];
 
         public bool IsOpen { get; private set; }
         /// <summary>User that is hosting relay</summary>
@@ -184,7 +184,7 @@ namespace Mirage.Sockets.EpicSocket
 
         private static void AddHandle(ref ulong handle, ulong value)
         {
-            if (value == Common.InvalidNotificationid)
+            if (value == Common.INVALID_NOTIFICATIONID)
                 throw new EpicSocketException("Handle was invalid");
 
             handle = value;
@@ -192,10 +192,10 @@ namespace Mirage.Sockets.EpicSocket
 
         private static void RemoveHandle(ref ulong handle, Action<ulong> removeAction)
         {
-            if (handle != Common.InvalidNotificationid)
+            if (handle != Common.INVALID_NOTIFICATIONID)
             {
                 removeAction.Invoke(handle);
-                handle = Common.InvalidNotificationid;
+                handle = Common.INVALID_NOTIFICATIONID;
             }
         }
 
@@ -224,7 +224,7 @@ namespace Mirage.Sockets.EpicSocket
             return new ReceivePacketOptions
             {
                 LocalUserId = LocalUser,
-                MaxDataSizeBytes = P2PInterface.MaxPacketSize,
+                MaxDataSizeBytes = P2PInterface.MAX_PACKET_SIZE,
                 RequestedChannel = 0,
             };
         }
@@ -283,7 +283,10 @@ namespace Mirage.Sockets.EpicSocket
 
         private bool receiveUsingOptions(out ReceivedPacket receivedPacket)
         {
-            var result = P2P.ReceivePacket(ref _receiveOptions, out var userID, out var socketId, out var outChannel, new ArraySegment<byte>(_receiveBuffer), out var outBytesWritten);
+
+            ProductUserId userID = null;
+            SocketId socketId = SocketId.Empty;
+            var result = P2P.ReceivePacket(ref _receiveOptions, ref userID, ref socketId, out var outChannel, new ArraySegment<byte>(_receiveBuffer), out var outBytesWritten);
 
             if (result != Result.Success && result != Result.NotFound) // log for results other than Success/NotFound
                 EpicLogger.logger.WarnResult("Receive Packet", result);

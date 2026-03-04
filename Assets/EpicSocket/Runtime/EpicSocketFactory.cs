@@ -175,7 +175,7 @@ namespace Mirage.Sockets.EpicSocket
 
 
         #region SocketFactory overrides
-        public override int MaxPacketSize => P2PInterface.MaxPacketSize;
+        public override int MaxPacketSize => P2PInterface.MAX_PACKET_SIZE;
 
         public override ISocket CreateServerSocket()
         {
